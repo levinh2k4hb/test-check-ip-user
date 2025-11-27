@@ -151,30 +151,30 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-5xl font-bold text-gray-800 mb-4">
+          <div className="text-center mb-8 sm:mb-12">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 mb-4">
               What is My IP Address?
             </h1>
-            <p className="text-xl text-gray-600">
+            <p className="text-lg sm:text-xl text-gray-600 px-2">
               Discover your public IP address and location information
             </p>
           </div>
 
           {/* Main IP Card */}
-          <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+          <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8">
             <div className="text-center">
-              <h2 className="text-3xl font-semibold text-gray-700 mb-6">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-700 mb-4 sm:mb-6">
                 Your Public IP Address
               </h2>
-              <div className="text-6xl font-mono font-bold text-blue-600 mb-8 p-6 bg-gray-50 rounded-lg">
+              <div className="text-3xl sm:text-4xl lg:text-6xl font-mono font-bold text-blue-600 mb-6 sm:mb-8 p-4 sm:p-6 bg-gray-50 rounded-lg break-all">
                 {ipInfo?.ip}
               </div>
               <button
                 onClick={() => ipInfo?.ip && copyToClipboard(ipInfo.ip)}
-                className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center mx-auto gap-2 text-lg"
+                className="px-6 sm:px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center mx-auto gap-2 text-base sm:text-lg w-full sm:w-auto justify-center"
               >
                 📋 Copy IP Address
               </button>
@@ -182,44 +182,44 @@ export default function Home() {
           </div>
 
           {/* Location Information */}
-          <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
-            <h3 className="text-3xl font-semibold text-gray-700 mb-8 text-center">
+          <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8">
+            <h3 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-700 mb-6 sm:mb-8 text-center">
               Your Location & Network Information
             </h3>
             
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="space-y-6">
-                <div className="flex justify-between items-center py-4 border-b border-gray-100">
-                  <span className="font-medium text-gray-600 text-lg">🌍 Country:</span>
-                  <span className="text-gray-800 text-lg font-semibold">{ipInfo?.country || 'N/A'}</span>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-3 sm:py-4 border-b border-gray-100">
+                  <span className="font-medium text-gray-600 text-base sm:text-lg mb-1 sm:mb-0">🌍 Country:</span>
+                  <span className="text-gray-800 text-base sm:text-lg font-semibold">{ipInfo?.country || 'N/A'}</span>
                 </div>
                 
-                <div className="flex justify-between items-center py-4 border-b border-gray-100">
-                  <span className="font-medium text-gray-600 text-lg">🏙️ City:</span>
-                  <span className="text-gray-800 text-lg font-semibold">{ipInfo?.city || 'N/A'}</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-3 sm:py-4 border-b border-gray-100">
+                  <span className="font-medium text-gray-600 text-base sm:text-lg mb-1 sm:mb-0">🏙️ City:</span>
+                  <span className="text-gray-800 text-base sm:text-lg font-semibold">{ipInfo?.city || 'N/A'}</span>
                 </div>
                 
-                <div className="flex justify-between items-center py-4 border-b border-gray-100">
-                  <span className="font-medium text-gray-600 text-lg">📍 Region:</span>
-                  <span className="text-gray-800 text-lg font-semibold">{ipInfo?.region || 'N/A'}</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-3 sm:py-4 border-b border-gray-100">
+                  <span className="font-medium text-gray-600 text-base sm:text-lg mb-1 sm:mb-0">📍 Region:</span>
+                  <span className="text-gray-800 text-base sm:text-lg font-semibold">{ipInfo?.region || 'N/A'}</span>
                 </div>
               </div>
               
-              <div className="space-y-6">
-                <div className="flex justify-between items-center py-4 border-b border-gray-100">
-                  <span className="font-medium text-gray-600 text-lg">🌐 ISP:</span>
-                  <span className="text-gray-800 text-lg font-semibold text-right">{ipInfo?.isp || 'N/A'}</span>
+              <div className="space-y-4 sm:space-y-6">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-3 sm:py-4 border-b border-gray-100">
+                  <span className="font-medium text-gray-600 text-base sm:text-lg mb-1 sm:mb-0">🌐 ISP:</span>
+                  <span className="text-gray-800 text-base sm:text-lg font-semibold text-left sm:text-right break-words">{ipInfo?.isp || 'N/A'}</span>
                 </div>
                 
-                <div className="flex justify-between items-center py-4 border-b border-gray-100">
-                  <span className="font-medium text-gray-600 text-lg">🕒 Timezone:</span>
-                  <span className="text-gray-800 text-lg font-semibold">{ipInfo?.timezone || 'N/A'}</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-3 sm:py-4 border-b border-gray-100">
+                  <span className="font-medium text-gray-600 text-base sm:text-lg mb-1 sm:mb-0">🕒 Timezone:</span>
+                  <span className="text-gray-800 text-base sm:text-lg font-semibold">{ipInfo?.timezone || 'N/A'}</span>
                 </div>
                 
                 {ipInfo?.latitude && ipInfo?.longitude && (
-                  <div className="flex justify-between items-center py-4 border-b border-gray-100">
-                    <span className="font-medium text-gray-600 text-lg">📍 Coordinates:</span>
-                    <span className="text-gray-800 text-lg font-semibold">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-3 sm:py-4 border-b border-gray-100">
+                    <span className="font-medium text-gray-600 text-base sm:text-lg mb-1 sm:mb-0">📍 Coordinates:</span>
+                    <span className="text-gray-800 text-base sm:text-lg font-semibold font-mono">
                       {ipInfo.latitude.toFixed(4)}, {ipInfo.longitude.toFixed(4)}
                     </span>
                   </div>
@@ -229,31 +229,31 @@ export default function Home() {
           </div>
 
           {/* Additional Information */}
-          <div className="bg-white rounded-xl shadow-lg p-8">
-            <h3 className="text-2xl font-semibold text-gray-700 mb-6 text-center">
+          <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8">
+            <h3 className="text-xl sm:text-2xl font-semibold text-gray-700 mb-4 sm:mb-6 text-center">
               About Your IP Address
             </h3>
             
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="bg-blue-50 p-6 rounded-lg">
-                <h4 className="text-lg font-semibold text-blue-800 mb-3">🔒 Privacy Note</h4>
-                <p className="text-gray-600">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+              <div className="bg-blue-50 p-4 sm:p-6 rounded-lg">
+                <h4 className="text-base sm:text-lg font-semibold text-blue-800 mb-2 sm:mb-3">🔒 Privacy Note</h4>
+                <p className="text-gray-600 text-sm sm:text-base">
                   Your IP address is visible to websites you visit. Consider using a VPN for enhanced privacy protection.
                 </p>
               </div>
               
-              <div className="bg-green-50 p-6 rounded-lg">
-                <h4 className="text-lg font-semibold text-green-800 mb-3">🌐 What is an IP?</h4>
-                <p className="text-gray-600">
+              <div className="bg-green-50 p-4 sm:p-6 rounded-lg">
+                <h4 className="text-base sm:text-lg font-semibold text-green-800 mb-2 sm:mb-3">🌐 What is an IP?</h4>
+                <p className="text-gray-600 text-sm sm:text-base">
                   An IP address is a unique identifier assigned to your device by your Internet Service Provider (ISP).
                 </p>
               </div>
             </div>
             
-            <div className="mt-8 text-center">
+            <div className="mt-6 sm:mt-8 text-center">
               <button
                 onClick={() => window.location.reload()}
-                className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors w-full sm:w-auto text-sm sm:text-base"
               >
                 🔄 Refresh Information
               </button>
