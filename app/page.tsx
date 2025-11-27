@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 
 interface IPInfo {
-  ip: string;
+  ipv4?: string;
+  ipv6?: string;
   city?: string;
   region?: string;
   country?: string;
@@ -22,29 +23,50 @@ export default function Home() {
     const fetchIPInfo = async () => {
       const apiUrls = [
         {
+          url: 'https://api64.ipify.org?format=json',
+          parser: (data: any) => {
+            const ip = data.ip;
+            if (ip.includes(':')) {
+              return { ipv6: ip };
+            } else {
+              return { ipv4: ip };
+            }
+          }
+        },
+        {
           url: 'https://api.ipify.org?format=json',
-          parser: (data: any) => ({ ip: data.ip })
+          parser: (data: any) => ({ ipv4: data.ip })
         },
         {
           url: 'https://httpbin.org/ip',
-          parser: (data: any) => ({ ip: data.origin })
-        },
-        {
-          url: 'https://api.my-ip.io/ip.json',
-          parser: (data: any) => ({ ip: data.ip })
+          parser: (data: any) => {
+            const ip = data.origin;
+            if (ip.includes(':')) {
+              return { ipv6: ip };
+            } else {
+              return { ipv4: ip };
+            }
+          }
         },
         {
           url: 'https://ipapi.co/json/',
-          parser: (data: any) => ({
-            ip: data.ip,
-            city: data.city,
-            region: data.region,
-            country: data.country_name,
-            isp: data.org,
-            timezone: data.timezone,
-            latitude: data.latitude,
-            longitude: data.longitude
-          })
+          parser: (data: any) => {
+            const result: any = {
+              city: data.city,
+              region: data.region,
+              country: data.country_name,
+              isp: data.org,
+              timezone: data.timezone,
+              latitude: data.latitude,
+              longitude: data.longitude
+            };
+            if (data.ip.includes(':')) {
+              result.ipv6 = data.ip;
+            } else {
+              result.ipv4 = data.ip;
+            }
+            return result;
+          }
         }
       ];
 
@@ -52,7 +74,9 @@ export default function Home() {
         setLoading(true);
         setError(null);
         
-        // Thử từng API cho đến khi có một cái work
+        let combinedInfo: IPInfo = {};
+        
+        // Thử lấy thông tin từ các API
         for (const apiConfig of apiUrls) {
           try {
             const response = await fetch(apiConfig.url, {
@@ -66,38 +90,46 @@ export default function Home() {
               const data = await response.json();
               const parsedData = apiConfig.parser(data);
               
-              // Nếu có IP thì set và break
-              if (parsedData.ip) {
-                setIpInfo(parsedData);
-                
-                // Nếu chưa có thông tin chi tiết, thử lấy thêm từ API khác
-                if (!('city' in parsedData) && parsedData.ip) {
-                  try {
-                    const geoResponse = await fetch(`http://ip-api.com/json/${parsedData.ip}`);
-                    if (geoResponse.ok) {
-                      const geoData = await geoResponse.json();
-                      setIpInfo({
-                        ...parsedData,
-                        city: geoData.city,
-                        region: geoData.regionName,
-                        country: geoData.country,
-                        isp: geoData.isp,
-                        timezone: geoData.timezone,
-                        latitude: geoData.lat,
-                        longitude: geoData.lon
-                      });
-                    }
-                  } catch (geoError) {
-                    console.log('Could not fetch geo info:', geoError);
-                  }
-                }
-                return; // Thành công, thoát khỏi loop
+              // Merge thông tin mới vào combinedInfo
+              combinedInfo = { ...combinedInfo, ...parsedData };
+              
+              // Nếu đã có cả IPv4 và thông tin địa lý thì break
+              if (combinedInfo.ipv4 && combinedInfo.city) {
+                break;
               }
             }
           } catch (apiError) {
             console.log(`API ${apiConfig.url} failed:`, apiError);
-            continue; // Thử API tiếp theo
+            continue;
           }
+        }
+        
+        // Nếu có ít nhất một IP, set thông tin
+        if (combinedInfo.ipv4 || combinedInfo.ipv6) {
+          setIpInfo(combinedInfo);
+          
+          // Nếu chưa có thông tin địa lý, thử lấy thêm
+          if (!combinedInfo.city && combinedInfo.ipv4) {
+            try {
+              const geoResponse = await fetch(`http://ip-api.com/json/${combinedInfo.ipv4}`);
+              if (geoResponse.ok) {
+                const geoData = await geoResponse.json();
+                setIpInfo(prev => ({
+                  ...prev!,
+                  city: geoData.city,
+                  region: geoData.regionName,
+                  country: geoData.country,
+                  isp: geoData.isp,
+                  timezone: geoData.timezone,
+                  latitude: geoData.lat,
+                  longitude: geoData.lon
+                }));
+              }
+            } catch (geoError) {
+              console.log('Could not fetch geo info:', geoError);
+            }
+          }
+          return;
         }
         
         // Nếu tất cả API đều fail
@@ -114,9 +146,9 @@ export default function Home() {
     fetchIPInfo();
   }, []);
 
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = (text: string, type: string = 'IP address') => {
     navigator.clipboard.writeText(text).then(() => {
-      alert('IP address copied to clipboard!');
+      alert(`${type} copied to clipboard!`);
     });
   };
 
@@ -167,17 +199,47 @@ export default function Home() {
           <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8">
             <div className="text-center">
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-700 mb-4 sm:mb-6">
-                Your Public IP Address
+                Your Public IP Addresses
               </h2>
-              <div className="text-3xl sm:text-4xl lg:text-6xl font-mono font-bold text-blue-600 mb-6 sm:mb-8 p-4 sm:p-6 bg-gray-50 rounded-lg break-all">
-                {ipInfo?.ip}
-              </div>
-              <button
-                onClick={() => ipInfo?.ip && copyToClipboard(ipInfo.ip)}
-                className="px-6 sm:px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center mx-auto gap-2 text-base sm:text-lg w-full sm:w-auto justify-center"
-              >
-                📋 Copy IP Address
-              </button>
+              
+              {/* IPv4 Section */}
+              {ipInfo?.ipv4 && (
+                <div className="mb-6">
+                  <h3 className="text-lg sm:text-xl font-medium text-gray-600 mb-3">IPv4 Address</h3>
+                  <div className="text-2xl sm:text-3xl lg:text-5xl font-mono font-bold text-blue-600 mb-4 p-4 sm:p-6 bg-blue-50 rounded-lg break-all">
+                    {ipInfo.ipv4}
+                  </div>
+                  <button
+                    onClick={() => copyToClipboard(ipInfo.ipv4!, 'IPv4 address')}
+                    className="px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base mr-2 mb-2"
+                  >
+                    📋 Copy IPv4
+                  </button>
+                </div>
+              )}
+              
+              {/* IPv6 Section */}
+              {ipInfo?.ipv6 && (
+                <div className="mb-6">
+                  <h3 className="text-lg sm:text-xl font-medium text-gray-600 mb-3">IPv6 Address</h3>
+                  <div className="text-xl sm:text-2xl lg:text-4xl font-mono font-bold text-green-600 mb-4 p-4 sm:p-6 bg-green-50 rounded-lg break-all">
+                    {ipInfo.ipv6}
+                  </div>
+                  <button
+                    onClick={() => copyToClipboard(ipInfo.ipv6!, 'IPv6 address')}
+                    className="px-4 sm:px-6 py-2 sm:py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm sm:text-base mb-2"
+                  >
+                    📋 Copy IPv6
+                  </button>
+                </div>
+              )}
+              
+              {/* No IP found */}
+              {!ipInfo?.ipv4 && !ipInfo?.ipv6 && (
+                <div className="text-2xl sm:text-3xl text-gray-500 mb-6 p-6 bg-gray-50 rounded-lg">
+                  No IP address detected
+                </div>
+              )}
             </div>
           </div>
 
@@ -234,7 +296,7 @@ export default function Home() {
               About Your IP Address
             </h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
               <div className="bg-blue-50 p-4 sm:p-6 rounded-lg">
                 <h4 className="text-base sm:text-lg font-semibold text-blue-800 mb-2 sm:mb-3">🔒 Privacy Note</h4>
                 <p className="text-gray-600 text-sm sm:text-base">
@@ -246,6 +308,20 @@ export default function Home() {
                 <h4 className="text-base sm:text-lg font-semibold text-green-800 mb-2 sm:mb-3">🌐 What is an IP?</h4>
                 <p className="text-gray-600 text-sm sm:text-base">
                   An IP address is a unique identifier assigned to your device by your Internet Service Provider (ISP).
+                </p>
+              </div>
+              
+              <div className="bg-purple-50 p-4 sm:p-6 rounded-lg">
+                <h4 className="text-base sm:text-lg font-semibold text-purple-800 mb-2 sm:mb-3">📊 IPv4 vs IPv6</h4>
+                <p className="text-gray-600 text-sm sm:text-base">
+                  IPv4 uses 32-bit addresses (like 192.168.1.1) while IPv6 uses 128-bit addresses (like 2001:db8::1) for more devices.
+                </p>
+              </div>
+              
+              <div className="bg-orange-50 p-4 sm:p-6 rounded-lg">
+                <h4 className="text-base sm:text-lg font-semibold text-orange-800 mb-2 sm:mb-3">🔍 IP Detection</h4>
+                <p className="text-gray-600 text-sm sm:text-base">
+                  Your device may have both IPv4 and IPv6 addresses depending on your network configuration.
                 </p>
               </div>
             </div>
